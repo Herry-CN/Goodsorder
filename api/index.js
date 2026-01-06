@@ -17,6 +17,7 @@ const upload = multer({ storage: storage });
 
 // Database initialization
 async function initDB() {
+  const logs = [];
   try {
     // Create products table
     await sql`
@@ -30,6 +31,7 @@ async function initDB() {
         spec TEXT NOT NULL
       )
     `;
+    logs.push("Products table check/create: OK");
 
     // Create orders table
     await sql`
@@ -43,6 +45,7 @@ async function initDB() {
         updatedAt BIGINT NOT NULL
       )
     `;
+    logs.push("Orders table check/create: OK");
 
     // Create categories table
     await sql`
@@ -51,6 +54,7 @@ async function initDB() {
         name TEXT NOT NULL UNIQUE
       )
     `;
+    logs.push("Categories table check/create: OK");
 
     // Initialize default categories if empty
     const { rows } = await sql`SELECT count(*) as count FROM categories`;
@@ -60,10 +64,15 @@ async function initDB() {
         const id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
         await sql`INSERT INTO categories (id, name) VALUES (${id}, ${cat})`;
       }
+      logs.push("Default categories initialized");
+    } else {
+      logs.push("Categories already exist, skipping default initialization");
     }
-    console.log('Database tables initialized');
+    
+    return { success: true, logs };
   } catch (err) {
     console.error('Error initializing database:', err);
+    return { success: false, error: err.message, stack: err.stack, logs };
   }
 }
 
@@ -73,8 +82,12 @@ async function initDB() {
 // API Routes
 
 app.get('/api/init', async (req, res) => {
-  await initDB();
-  res.send('Database initialization attempted. Check logs for details.');
+  const result = await initDB();
+  if (result.success) {
+    res.json(result);
+  } else {
+    res.status(500).json(result);
+  }
 });
 
 // --- Categories ---
