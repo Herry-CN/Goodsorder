@@ -65,7 +65,7 @@ class DatabaseService {
       if (!response.ok) throw new Error('Failed to upload file');
       
       const data = await response.json();
-      return data.path; // Returns relative path like /uploads/filename.ext
+      return data.path; // Now returns full Blob URL
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
