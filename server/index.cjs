@@ -37,6 +37,9 @@ app.use(bodyParser.json());
 // Serve uploaded files statically
 app.use('/uploads', express.static(UPLOAD_DIR));
 
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../dist')));
+
 // Database initialization
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
@@ -203,6 +206,16 @@ app.delete('/api/products/:id', (req, res) => {
       res.json({ message: 'Product deleted', changes: this.changes });
     });
   });
+});
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 // --- Orders ---
