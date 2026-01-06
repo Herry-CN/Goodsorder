@@ -68,9 +68,14 @@ async function initDB() {
 }
 
 // Run DB init on start (careful in serverless, but okay for low traffic)
-initDB();
+// initDB(); // Commented out to avoid cold start issues, use manual init or lazy init
 
 // API Routes
+
+app.get('/api/init', async (req, res) => {
+  await initDB();
+  res.send('Database initialization attempted. Check logs for details.');
+});
 
 // --- Categories ---
 

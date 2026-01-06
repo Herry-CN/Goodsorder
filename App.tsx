@@ -24,34 +24,68 @@ const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [dbReady, setDbReady] = useState(false);
+  const [dbError, setDbError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [currentRole, setCurrentRole] = useState<UserRole>(UserRole.CUSTOMER);
-  const [cart, setCart] = useState<{ [id: string]: number }>({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const [category, setCategory] = useState('全部');
-  const [lastOrderAlert, setLastOrderAlert] = useState(false);
-  const [showProductModal, setShowProductModal] = useState<Product | null>(null);
-  const [isReviewingCart, setIsReviewingCart] = useState(false);
+
+  // ...
 
   // Database Initialization
   useEffect(() => {
     const initDB = async () => {
-      await dbService.init();
-      const dbProducts = await dbService.getAll<Product>('products');
-      const dbOrders = await dbService.getAll<Order>('orders');
-      
-      if (dbProducts.length === 0) {
-        await dbService.saveAll('products', INITIAL_PRODUCTS);
-        setProducts(INITIAL_PRODUCTS);
-      } else {
-        setProducts(dbProducts);
+      try {
+        await dbService.init();
+        const dbProducts = await dbService.getAll<Product>('products');
+        const dbOrders = await dbService.getAll<Order>('orders');
+        
+        if (dbProducts.length === 0) {
+          // Attempt to initialize default products
+          // But first, we might want to ensure the table actually exists by calling a dummy endpoint if needed
+          // For now, saveAll will trigger the table check on backend if we implement it correctly
+          try {
+            await dbService.saveAll('products', INITIAL_PRODUCTS);
+            setProducts(INITIAL_PRODUCTS);
+          } catch (e) {
+            console.warn("Failed to init default products, maybe database is readonly or connecting...", e);
+            // Don't block app start, just show empty list
+            setProducts([]);
+          }
+        } else {
+          setProducts(dbProducts);
+        }
+        setOrders(dbOrders);
+        setDbReady(true);
+      } catch (err) {
+        console.error("System initialization failed:", err);
+        setDbError("无法连接到数据库。请检查 Vercel 数据库配置并确保已重新部署 (Redeploy)。");
       }
-      setOrders(dbOrders);
-      setDbReady(true);
     };
     initDB();
   }, []);
+
+  if (dbError) return (
+    <div className="flex h-screen items-center justify-center flex-col gap-4 p-8 text-center">
+      <div className="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-500 text-2xl mb-2">
+        <i className="fas fa-exclamation-triangle"></i>
+      </div>
+      <div className="text-slate-800 font-black text-xl">系统启动失败</div>
+      <p className="text-slate-500 max-w-md leading-relaxed">{dbError}</p>
+      <div className="flex gap-4 mt-4">
+        <button onClick={() => window.location.reload()} className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200">
+          刷新重试
+        </button>
+        <a href="/api/init" target="_blank" className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold">
+          尝试手动初始化数据库
+        </a>
+      </div>
+    </div>
+  );
+
+  if (!dbReady) return (
+    <div className="flex h-screen items-center justify-center flex-col gap-4">
+      <i className="fas fa-circle-notch fa-spin text-indigo-600 text-3xl"></i>
+      <div className="text-slate-400 font-bold">数据库连接中...</div>
+    </div>
+  );
 
   // Sync mechanisms
   useEffect(() => {
