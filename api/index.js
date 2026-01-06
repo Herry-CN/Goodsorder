@@ -1,9 +1,9 @@
-const express = require('express');
-const { sql } = require('@vercel/postgres');
-const { put, del } = require('@vercel/blob');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const multer = require('multer');
+import express from 'express';
+import { sql } from '@vercel/postgres';
+import { put, del } from '@vercel/blob';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import multer from 'multer';
 
 const app = express();
 
@@ -220,4 +220,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-module.exports = app;
+export default app;
