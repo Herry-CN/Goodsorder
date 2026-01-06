@@ -1,0 +1,8 @@
+{
+  "name": "SmartStore: Offline Order System",
+  "description": "A collaborative multi-role ordering and management system for local shops featuring real-time sync, large-print UI, and AI-assisted inventory management.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
