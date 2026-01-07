@@ -26,8 +26,14 @@ const App: React.FC = () => {
   const [dbReady, setDbReady] = useState(false);
   const [dbError, setDbError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
-
-  // ...
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [currentRole, setCurrentRole] = useState<UserRole>(UserRole.CUSTOMER);
+  const [cart, setCart] = useState<{ [id: string]: number }>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [category, setCategory] = useState('全部');
+  const [lastOrderAlert, setLastOrderAlert] = useState(false);
+  const [showProductModal, setShowProductModal] = useState<Product | null>(null);
+  const [isReviewingCart, setIsReviewingCart] = useState(false);
 
   // Database Initialization
   useEffect(() => {
