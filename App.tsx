@@ -76,6 +76,42 @@ const App: React.FC = () => {
     return () => syncManager.unsubscribe();
   }, [currentRole]);
 
+  // Polling for multi-device sync
+  useEffect(() => {
+    if (!dbReady) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        // Poll orders more frequently
+        const latestOrders = await dbService.getAll<Order>('orders');
+        setOrders(prev => {
+          // Simple check to avoid unnecessary re-renders
+          if (JSON.stringify(prev) !== JSON.stringify(latestOrders)) {
+            // If we are admin and new pending orders arrived, show alert
+            if (currentRole !== UserRole.CUSTOMER) {
+              const prevPending = prev.filter(o => o.status === OrderStatus.PENDING).length;
+              const newPending = latestOrders.filter(o => o.status === OrderStatus.PENDING).length;
+              if (newPending > prevPending) {
+                setLastOrderAlert(true);
+                setTimeout(() => setLastOrderAlert(false), 3000);
+              }
+            }
+            return latestOrders;
+          }
+          return prev;
+        });
+
+        // Poll products less frequently (every 5th tick? or just every time if payload small)
+        // For simplicity, fetch products every time too, or maybe every 10s.
+        // Let's stick to orders primarily.
+      } catch (err) {
+        console.error("Polling failed", err);
+      }
+    }, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [dbReady, currentRole]);
+
   const addToCart = (productId: string) => {
     setCart(prev => {
       const currentQty = (prev as Record<string, number>)[productId] || 0;
