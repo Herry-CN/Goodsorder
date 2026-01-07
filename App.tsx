@@ -159,11 +159,21 @@ const App: React.FC = () => {
   const updateOrderStatus = async (orderId: string, nextStatus: OrderStatus) => {
     const order = orders.find(o => o.id === orderId);
     if (order) {
+      // Optimistic update
+      const previousOrders = [...orders];
       const updatedOrder = { ...order, status: nextStatus, updatedAt: Date.now() };
-      await dbService.put('orders', updatedOrder);
       const newOrders = orders.map(o => o.id === orderId ? updatedOrder : o);
       setOrders(newOrders);
-      syncManager.broadcast({ type: 'ORDER_UPDATE', payload: newOrders });
+
+      try {
+        await dbService.put('orders', updatedOrder);
+        syncManager.broadcast({ type: 'ORDER_UPDATE', payload: newOrders });
+      } catch (err) {
+        console.error('Failed to update order status:', err);
+        // Rollback on failure
+        setOrders(previousOrders);
+        alert(`更新订单状态失败: ${(err as Error).message}，已恢复显示。`);
+      }
     }
   };
 
