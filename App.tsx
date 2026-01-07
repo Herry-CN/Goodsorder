@@ -60,31 +60,6 @@ const App: React.FC = () => {
     initDB();
   }, []);
 
-  if (dbError) return (
-    <div className="flex h-screen items-center justify-center flex-col gap-4 p-8 text-center">
-      <div className="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-500 text-2xl mb-2">
-        <i className="fas fa-exclamation-triangle"></i>
-      </div>
-      <div className="text-slate-800 font-black text-xl">系统启动失败</div>
-      <p className="text-slate-500 max-w-md leading-relaxed">{dbError}</p>
-      <div className="flex gap-4 mt-4">
-        <button onClick={() => window.location.reload()} className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200">
-          刷新重试
-        </button>
-        <a href="/api/init" target="_blank" className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold">
-          尝试手动初始化数据库
-        </a>
-      </div>
-    </div>
-  );
-
-  if (!dbReady) return (
-    <div className="flex h-screen items-center justify-center flex-col gap-4">
-      <i className="fas fa-circle-notch fa-spin text-indigo-600 text-3xl"></i>
-      <div className="text-slate-400 font-bold">数据库连接中...</div>
-    </div>
-  );
-
   // Sync mechanisms
   useEffect(() => {
     syncManager.subscribe((msg) => {
