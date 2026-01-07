@@ -225,6 +225,15 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    await sql`DELETE FROM orders WHERE id = ${req.params.id}`;
+    res.json({ message: 'Order deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // For local dev, we might want to start the server
 // But for Vercel, we export the app
 if (process.env.NODE_ENV !== 'production') {

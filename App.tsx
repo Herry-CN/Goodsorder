@@ -131,6 +131,18 @@ const App: React.FC = () => {
     }
   };
 
+  const deleteOrder = async (orderId: string) => {
+    try {
+      await dbService.delete('orders', orderId);
+      const newOrders = orders.filter(o => o.id !== orderId);
+      setOrders(newOrders);
+      syncManager.broadcast({ type: 'ORDER_UPDATE', payload: newOrders });
+    } catch (err) {
+      console.error('Failed to delete order:', err);
+      alert('删除订单失败，请重试');
+    }
+  };
+
   const handleProductsChange = async (newProducts: Product[]) => {
     await dbService.saveAll('products', newProducts);
     setProducts(newProducts);
@@ -316,7 +328,12 @@ const App: React.FC = () => {
             <span className="text-xs font-black text-slate-500">DB同步正常</span>
           </div>
         </div>
-        <OrderManagement orders={orders} role={currentRole} onAction={updateOrderStatus} />
+        <OrderManagement 
+          orders={orders} 
+          role={currentRole} 
+          onAction={updateOrderStatus}
+          onDelete={currentRole === UserRole.CASHIER ? deleteOrder : undefined}
+        />
       </section>
     </div>
   );

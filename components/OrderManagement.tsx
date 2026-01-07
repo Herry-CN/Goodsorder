@@ -6,9 +6,10 @@ interface OrderManagementProps {
   orders: Order[];
   role: UserRole;
   onAction: (orderId: string, nextStatus: OrderStatus) => void;
+  onDelete?: (orderId: string) => void;
 }
 
-const OrderManagement: React.FC<OrderManagementProps> = ({ orders, role, onAction }) => {
+const OrderManagement: React.FC<OrderManagementProps> = ({ orders, role, onAction, onDelete }) => {
   const filteredOrders = orders.filter(o => 
     o.status !== OrderStatus.COMPLETED || role === UserRole.CASHIER
   ).sort((a, b) => b.updatedAt - a.updatedAt);
@@ -72,6 +73,20 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ orders, role, onActio
           </div>
 
           <div className="flex gap-3">
+            {onDelete && role === UserRole.CASHIER && (
+              <button
+                onClick={() => {
+                  if (window.confirm('确定要删除此订单吗？')) {
+                    onDelete(order.id);
+                  }
+                }}
+                className="w-14 bg-rose-100 text-rose-600 rounded-xl font-bold shadow-sm active:scale-95 transition-all text-lg flex items-center justify-center"
+                title="删除订单"
+              >
+                <i className="fas fa-trash-alt"></i>
+              </button>
+            )}
+            
             {order.status === OrderStatus.PENDING && (role === UserRole.PICKER || role === UserRole.CASHIER) && (
               <button
                 onClick={() => onAction(order.id, OrderStatus.PICKING_DONE)}
