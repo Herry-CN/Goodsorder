@@ -195,7 +195,9 @@ app.get('/api/orders', async (req, res) => {
     const { rows } = await sql`SELECT * FROM orders`;
     // Parse items back to JSON
     const orders = rows.map(order => ({
-      ...order,
+      id: order.id,
+      clientId: order.clientid, // Map lowercase from DB to camelCase
+      status: order.status,
       items: JSON.parse(order.items),
       totalAmount: parseFloat(order.totalamount), // Postgres might return string for numeric
       createdAt: parseInt(order.createdat),
