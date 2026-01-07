@@ -54,9 +54,9 @@ const App: React.FC = () => {
         }
         setOrders(dbOrders);
         setDbReady(true);
-      } catch (err) {
+      } catch (err: any) {
         console.error("System initialization failed:", err);
-        setDbError("无法连接到数据库。请检查 Vercel 数据库配置并确保已重新部署 (Redeploy)。");
+        setDbError(`系统初始化失败: ${err.message || '未知错误'}。请确保数据库已连接。`);
       }
     };
     initDB();
