@@ -220,6 +220,7 @@ app.post('/api/orders', async (req, res) => {
     `;
     res.json({ message: 'Order saved', id: id });
   } catch (err) {
+    console.error('Failed to save order:', err);
     res.status(500).json({ error: err.message });
   }
 });
