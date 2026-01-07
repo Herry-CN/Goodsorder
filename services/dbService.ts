@@ -39,7 +39,14 @@ class DatabaseService {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      throw new Error(`Failed to put to ${storeName}: ${response.statusText}`);
+      let errorMsg = response.statusText;
+      try {
+        const err = await response.json();
+        errorMsg = err.error || err.message || response.statusText;
+      } catch (e) {
+        // ignore
+      }
+      throw new Error(`Failed to put to ${storeName}: ${errorMsg}`);
     }
   }
 
