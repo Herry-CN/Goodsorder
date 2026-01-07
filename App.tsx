@@ -132,14 +132,19 @@ const App: React.FC = () => {
   };
 
   const deleteOrder = async (orderId: string) => {
+    // Optimistic update
+    const previousOrders = [...orders];
+    const newOrders = orders.filter(o => o.id !== orderId);
+    setOrders(newOrders);
+    
     try {
       await dbService.delete('orders', orderId);
-      const newOrders = orders.filter(o => o.id !== orderId);
-      setOrders(newOrders);
       syncManager.broadcast({ type: 'ORDER_UPDATE', payload: newOrders });
     } catch (err) {
       console.error('Failed to delete order:', err);
-      alert('删除订单失败，请重试');
+      // Rollback on failure
+      setOrders(previousOrders);
+      alert(`删除订单失败: ${(err as Error).message}，已恢复显示。`);
     }
   };
 
