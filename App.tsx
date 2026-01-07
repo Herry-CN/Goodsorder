@@ -44,17 +44,9 @@ const App: React.FC = () => {
         const dbOrders = await dbService.getAll<Order>('orders');
         
         if (dbProducts.length === 0) {
-          // Attempt to initialize default products
-          // But first, we might want to ensure the table actually exists by calling a dummy endpoint if needed
-          // For now, saveAll will trigger the table check on backend if we implement it correctly
-          try {
-            await dbService.saveAll('products', INITIAL_PRODUCTS);
-            setProducts(INITIAL_PRODUCTS);
-          } catch (e) {
-            console.warn("Failed to init default products, maybe database is readonly or connecting...", e);
-            // Don't block app start, just show empty list
-            setProducts([]);
-          }
+          // Attempt to initialize default products if the store is empty
+          await dbService.saveAll('products', INITIAL_PRODUCTS);
+          setProducts(INITIAL_PRODUCTS);
         } else {
           setProducts(dbProducts);
         }
