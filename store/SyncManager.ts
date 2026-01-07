@@ -21,6 +21,10 @@ class SyncManager {
     this.channel.postMessage(message);
   }
 
+  unsubscribe() {
+    this.channel.onmessage = null;
+  }
+
   close() {
     this.channel.close();
   }

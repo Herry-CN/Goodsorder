@@ -73,7 +73,7 @@ const App: React.FC = () => {
         setProducts(msg.payload);
       }
     });
-    return () => syncManager.close();
+    return () => syncManager.unsubscribe();
   }, [currentRole]);
 
   const addToCart = (productId: string) => {
